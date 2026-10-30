@@ -1,4 +1,4 @@
-const state = { view: 'dashboard', catalogTab: 'products', orders: [], products: [], ingredients: [], subscriptions: [], selectedDate: null, from: null, through: null, user: null };
+const state = { view: 'dashboard', catalogTab: 'products', orders: [], products: [], categories: [], ingredients: [], subscriptions: [], selectedDate: null, from: null, through: null, user: null };
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const money = cents => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((cents ?? 0) / 100);
@@ -20,11 +20,12 @@ function showWorkspace() { $('#login').hidden = true; $('#workspace').hidden = f
 async function refresh() {
   const from = state.from || today();
   const through = state.through || addDays(from, 34);
-  const [orders, products, ingredients, subscriptions] = await Promise.all([
+  const [orders, products, categories, ingredients, subscriptions] = await Promise.all([
     api(`/api/v1/staff/orders?from=${from}&through=${through}`), api('/api/v1/staff/products'),
+    api('/api/v1/staff/categories'),
     api('/api/v1/staff/ingredients'), api('/api/v1/staff/subscriptions')
   ]);
-  Object.assign(state, { orders: orders.orders, products: products.products, ingredients: ingredients.ingredients, subscriptions: subscriptions.subscriptions });
+  Object.assign(state, { orders: orders.orders, products: products.products, categories: categories.categories, ingredients: ingredients.ingredients, subscriptions: subscriptions.subscriptions });
   render();
 }
 
@@ -68,7 +69,10 @@ function renderSubscriptions() {
 
 function renderCatalog() {
   const ingredients = state.catalogTab === 'ingredients';
-  $('#view').innerHTML = `<div class="section-head"><div><h2>Menu catalog</h2><p>Products can include ingredients; combos contain products.</p></div><button class="button primary" data-create="${ingredients ? 'ingredient' : 'product'}">+ New ${ingredients ? 'ingredient' : 'product'}</button></div><div class="catalog-tabs"><button class="button ${!ingredients ? 'active' : ''}" data-catalog="products">Products & combos</button><button class="button ${ingredients ? 'active' : ''}" data-catalog="ingredients">Ingredients</button></div><div class="panel table-wrap"><table class="data-table">${ingredients ? `<thead><tr><th>Ingredient</th><th>Serving</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>${state.ingredients.map(item => `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.allergens || '')}</small></td><td>${esc(item.servingSize)} ${esc(item.servingUnit)}</td><td>${esc(item.proteinG ?? '—')} g</td><td>${esc(item.carbsG ?? '—')} g</td><td>${esc(item.fatG ?? '—')} g</td><td><button class="button small" data-ingredient="${esc(item.id)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No ingredients yet.</td></tr>'}</tbody>` : `<thead><tr><th>Product</th><th>Kind</th><th>Price</th><th></th></tr></thead><tbody>${state.products.map(item => `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.description || '')}</small></td><td>${statusBadge(item.kind)}</td><td>${money(item.priceCents)}</td><td><button class="button small" data-product="${esc(item.id)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="4" class="empty">No products yet.</td></tr>'}</tbody>`}</table></div>`;
+  const rows = ingredients
+    ? `<thead><tr><th>Ingredient</th><th>Serving</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>${state.ingredients.map(item => `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.allergens || '')}</small></td><td>${esc(item.servingSize)} ${esc(item.servingUnit)}</td><td>${esc(item.proteinG ?? '—')} g</td><td>${esc(item.carbsG ?? '—')} g</td><td>${esc(item.fatG ?? '—')} g</td><td><button class="button small" data-ingredient="${esc(item.id)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No ingredients yet.</td></tr>'}</tbody>`
+    : `<thead><tr><th>Product</th><th>Category</th><th>Kind</th><th>One-time</th><th>Weekly</th><th></th></tr></thead><tbody>${state.products.map(item => `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.description || '')}</small></td><td>${esc(item.categoryName || 'Uncategorized')}</td><td>${statusBadge(item.kind)}</td><td>${money(item.priceCents)}</td><td>${item.weeklyPriceCents === null ? '—' : money(item.weeklyPriceCents)}</td><td><button class="button small" data-product="${esc(item.id)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No products yet.</td></tr>'}</tbody>`;
+  $('#view').innerHTML = `<div class="section-head"><div><h2>Menu catalog</h2><p>Products can include ingredients; combos contain products.</p></div><button class="button primary" data-create="${ingredients ? 'ingredient' : 'product'}">+ New ${ingredients ? 'ingredient' : 'product'}</button></div><div class="catalog-tabs"><button class="button ${!ingredients ? 'active' : ''}" data-catalog="products">Products & combos</button><button class="button ${ingredients ? 'active' : ''}" data-catalog="ingredients">Ingredients</button></div><div class="panel table-wrap"><table class="data-table">${rows}</table></div>`;
 }
 
 function render() { ({ dashboard: renderDashboard, orders: renderOrders, subscriptions: renderSubscriptions, catalog: renderCatalog })[state.view](); }
@@ -103,7 +107,8 @@ function openProductForm(product = null) {
   const value = product || {};
   const kind = value.kind || 'individual';
   const relations = kind === 'combo' ? value.components || [{}] : value.ingredients || [];
-  const html = `<form id="product-form" data-id="${esc(value.id || '')}"><div class="form-grid"><label class="full">Product name<input name="name" value="${esc(value.name || '')}" required></label><label>Price ($)<input name="price" type="number" step="0.01" min="0" max="10000" value="${value.priceCents === undefined ? '' : esc((value.priceCents / 100).toFixed(2))}" required></label><label>Kind<select name="kind"><option value="individual" ${kind === 'individual' ? 'selected' : ''}>Individual product</option><option value="combo" ${kind === 'combo' ? 'selected' : ''}>Combo</option></select></label><label class="full">Description<textarea name="description">${esc(value.description || '')}</textarea></label></div><div class="form-section"><h3 id="relation-title">${kind === 'combo' ? 'Products in combo' : 'Ingredients (optional)'}</h3><div id="relations">${relations.map(row => relationLine(kind, row)).join('')}</div><button type="button" class="button small" data-add-row="relation">+ Add ${kind === 'combo' ? 'product' : 'ingredient'}</button></div><div class="form-actions"><button type="button" class="button" data-close>Cancel</button><button class="button primary" type="submit">Save product</button></div></form>`;
+  const categories = `<option value="">Uncategorized</option>` + state.categories.filter(item => item.active).map(item => `<option value="${esc(item.id)}" ${value.categoryId === item.id ? 'selected' : ''}>${esc(item.name)}</option>`).join('');
+  const html = `<form id="product-form" data-id="${esc(value.id || '')}"><div class="form-grid"><label class="full">Product name<input name="name" value="${esc(value.name || '')}" required></label><label>One-time price ($)<input name="price" type="number" step="0.01" min="0" max="10000" value="${value.priceCents === undefined ? '' : esc((value.priceCents / 100).toFixed(2))}" required></label><label>Weekly price ($, optional)<input name="weeklyPrice" type="number" step="0.01" min="0" max="10000" value="${value.weeklyPriceCents === null || value.weeklyPriceCents === undefined ? '' : esc((value.weeklyPriceCents / 100).toFixed(2))}"></label><label>Category<select name="categoryId">${categories}</select></label><label>Kind<select name="kind"><option value="individual" ${kind === 'individual' ? 'selected' : ''}>Individual product</option><option value="combo" ${kind === 'combo' ? 'selected' : ''}>Combo</option></select></label><label class="full">Description<textarea name="description">${esc(value.description || '')}</textarea></label></div><div class="form-section"><h3 id="relation-title">${kind === 'combo' ? 'Products in combo' : 'Ingredients (optional)'}</h3><div id="relations">${relations.map(row => relationLine(kind, row)).join('')}</div><button type="button" class="button small" data-add-row="relation">+ Add ${kind === 'combo' ? 'product' : 'ingredient'}</button></div><div class="form-actions"><button type="button" class="button" data-close>Cancel</button><button class="button primary" type="submit">Save product</button></div></form>`;
   openEditor(product ? 'Edit product' : 'New product', html);
 }
 
@@ -139,9 +144,11 @@ async function submitEditor(event) {
     path = `/api/v1/staff/products${id ? `/${id}` : ''}`;
     const kind = formValue(form,'kind');
     const priceCents = Math.round(Number(formValue(form,'price')) * 100);
+    const weeklyPrice = formValue(form,'weeklyPrice');
+    const weeklyPriceCents = weeklyPrice === null ? null : Math.round(Number(weeklyPrice) * 100);
     const relations = Array.from(form.querySelectorAll('#relations .item-line')).map(row => ({ id: row.querySelector('.relation-id').value, value: Number(row.querySelector('.relation-quantity').value) }));
     if (relations.some(row => !row.id)) throw new Error('Select each ingredient or component');
-    data = { name: formValue(form,'name'), priceCents, kind, description: formValue(form,'description'), ingredients: kind === 'individual' ? relations.map(row => ({ id: row.id, servings: row.value })) : [], components: kind === 'combo' ? relations.map(row => ({ id: row.id, quantity: row.value })) : [] };
+    data = { name: formValue(form,'name'), priceCents, weeklyPriceCents, categoryId: formValue(form,'categoryId'), kind, description: formValue(form,'description'), ingredients: kind === 'individual' ? relations.map(row => ({ id: row.id, servings: row.value })) : [], components: kind === 'combo' ? relations.map(row => ({ id: row.id, quantity: row.value })) : [] };
   } else return;
   await api(path, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) });
   closeEditor();

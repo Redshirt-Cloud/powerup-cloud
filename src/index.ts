@@ -1,5 +1,5 @@
 import { bootstrapUser, login, logout, sameOriginMutation, staffIdentity, type Env as AuthEnv } from './auth';
-import { getProduct, listIngredients, listProducts, saveIngredient, saveProduct } from './catalog';
+import { getProduct, listCategories, listIngredients, listProducts, saveIngredient, saveProduct } from './catalog';
 import { object } from './input';
 import { createOrder, getOrder, listOrders, updateOrder } from './orders';
 import { getSubscription, listSubscriptions, saveSubscription, syncSubscriptions } from './subscriptions';
@@ -52,6 +52,7 @@ export default {
       if (pathname === '/api/v1/auth/me' && request.method === 'GET') return json({ user: staff });
       if (pathname === '/api/v1/auth/logout' && request.method === 'POST') return await logout(request, env);
       if (pathname === '/api/v1/staff/ingredients' && request.method === 'GET') return await listIngredients(env);
+      if (pathname === '/api/v1/staff/categories' && request.method === 'GET') return await listCategories(env);
       if (pathname === '/api/v1/staff/ingredients' && request.method === 'POST') return await saveIngredient(env, await body(request));
       const ingredientId = pathname.match(/^\/api\/v1\/staff\/ingredients\/([a-f0-9-]+)$/)?.[1];
       if (ingredientId && request.method === 'PATCH') return await saveIngredient(env, await body(request), ingredientId);
@@ -79,7 +80,7 @@ export default {
       if (subscriptionId && request.method === 'PATCH') return await saveSubscription(env, await body(request), subscriptionId);
       return json({ error: 'Not found' }, 404);
     } catch (error) {
-      if (error instanceof Error && /^(Expected|Invalid|Provide|Duplicate|A combo|Only combos|Add ingredients|Product ingredients|Combo components|One or more|Order total|Order date|Completed orders|Recurring order|No order|endDate|startDate|name|priceCents|servingSize|servings|quantity|customer|fulfillment|items|notes|calories|proteinG|carbsG|fatG|fiberG|sugarG|sodiumMg|allergens|description|Request body)/.test(error.message)) return json({ error: error.message }, 400);
+      if (error instanceof Error && /^(Expected|Invalid|Provide|Duplicate|A combo|Only combos|Add ingredients|Product ingredients|Combo components|One or more|Order total|Order date|Completed orders|Recurring order|No order|endDate|startDate|name|priceCents|weeklyPriceCents|categoryId|servingSize|servings|quantity|customer|fulfillment|items|notes|calories|proteinG|carbsG|fatG|fiberG|sugarG|sodiumMg|allergens|description|Request body)/.test(error.message)) return json({ error: error.message }, 400);
       console.error('Request failed', error);
       return json({ error: 'Internal server error' }, 500);
     }
