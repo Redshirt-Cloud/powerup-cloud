@@ -1,3 +1,5 @@
+import { validDate } from './recurrence';
+
 export type OrderInput = {
   source: 'staff' | 'website' | 'facebook' | 'phone' | 'other';
   customerName: string;
@@ -17,8 +19,7 @@ export function parseOrderInput(value: unknown): OrderInput {
   const customerPhone = optionalString(data.customerPhone, 'customerPhone', 40);
   if (!customerEmail && !customerPhone) throw new Error('Provide customerEmail or customerPhone');
   const fulfillmentDate = requiredString(data.fulfillmentDate, 'fulfillmentDate', 10);
-  const parsedDate = new Date(`${fulfillmentDate}T00:00:00Z`);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fulfillmentDate) || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== fulfillmentDate) {
+  if (!validDate(fulfillmentDate)) {
     throw new Error('fulfillmentDate must be a valid YYYY-MM-DD date');
   }
   if (data.fulfillmentMethod !== 'pickup' && data.fulfillmentMethod !== 'delivery') throw new Error('Invalid fulfillmentMethod');

@@ -1,1 +1,2 @@
 STAFF_API_TOKEN=replace-with-a-random-secret-at-least-32-characters-long
+AUTH_PEPPER=replace-with-a-separate-random-secret-at-least-32-characters-long
