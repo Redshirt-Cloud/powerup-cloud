@@ -2,6 +2,7 @@ import type { Env } from './auth';
 import { object, optional } from './input';
 import { parseOrderInput, type OrderInput } from './order-input';
 import { addDays, kitchenToday, validDate } from './recurrence';
+import { priceSelections } from './variations';
 
 type Product = { id: string; name: string; price_cents: number; active: number; kind: 'individual' | 'combo' };
 type ComboComponent = { product_id: string; product_name: string; quantity: number };
@@ -12,21 +13,27 @@ export async function pricedItems(env: Env, input: OrderInput) {
   const components = await Promise.all(products.map(product => product!.kind === 'combo'
     ? env.DB.prepare('SELECT cp.product_id, p.name AS product_name, cp.quantity FROM combo_products cp JOIN products p ON p.id = cp.product_id WHERE cp.combo_id = ?').bind(product!.id).all<ComboComponent>()
     : Promise.resolve({ results: [] as ComboComponent[] })));
-  const items = input.items.map((item, index) => ({ ...item, product: products[index]!, components: components[index].results, lineTotalCents: item.quantity * products[index]!.price_cents }));
+  const selections = await Promise.all(input.items.map(item => priceSelections(env, item.productId, item.selections)));
+  const items = input.items.map((item, index) => {
+    const unitPriceCents = products[index]!.price_cents + selections[index].deltaCents;
+    return { ...item, product: products[index]!, components: components[index].results, variations: selections[index].snapshots, unitPriceCents, lineTotalCents: item.quantity * unitPriceCents };
+  });
   const totalCents = items.reduce((sum, item) => sum + item.lineTotalCents, 0);
   if (!Number.isSafeInteger(totalCents)) throw new Error('Order total is too large');
   return { items, totalCents };
 }
 
 export function itemStatements(env: Env, orderId: string, items: Awaited<ReturnType<typeof pricedItems>>['items'], deterministic = false): D1PreparedStatement[] {
-  return items.flatMap(item => {
-    const itemId = deterministic ? `${orderId}:${item.product.id}` : crypto.randomUUID();
+  return items.flatMap((item, index) => {
+    const itemId = deterministic ? `${orderId}:${index}` : crypto.randomUUID();
     const insert = deterministic ? 'INSERT OR IGNORE' : 'INSERT';
     return [
       env.DB.prepare(`${insert} INTO order_items (id, order_id, product_id, product_name, unit_price_cents, quantity, line_total_cents) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-        .bind(itemId, orderId, item.product.id, item.product.name, item.product.price_cents, item.quantity, item.lineTotalCents),
+        .bind(itemId, orderId, item.product.id, item.product.name, item.unitPriceCents, item.quantity, item.lineTotalCents),
       ...item.components.map(component => env.DB.prepare(`${insert} INTO order_item_components (order_item_id, product_id, product_name, quantity) VALUES (?, ?, ?, ?)`)
-        .bind(itemId, component.product_id, component.product_name, component.quantity * item.quantity))
+        .bind(itemId, component.product_id, component.product_name, component.quantity * item.quantity)),
+      ...item.variations.map(variation => env.DB.prepare(`${insert} INTO order_item_variations (order_item_id, group_id, group_name, option_id, option_name, price_delta_cents, group_order, option_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(itemId, variation.groupId, variation.groupName, variation.optionId, variation.optionName, variation.priceDeltaCents, variation.groupOrder, variation.optionOrder))
     ];
   });
 }
@@ -57,7 +64,12 @@ export async function getOrder(env: Env, id: string): Promise<Response> {
   if (!order) return Response.json({ error: 'Order not found' }, { status: 404 });
   const items = await env.DB.prepare('SELECT id, product_id AS productId, product_name AS productName, unit_price_cents AS unitPriceCents, quantity, line_total_cents AS lineTotalCents FROM order_items WHERE order_id = ?').bind(id).all();
   const components = await env.DB.prepare('SELECT c.order_item_id AS orderItemId, c.product_id AS productId, c.product_name AS productName, c.quantity FROM order_item_components c JOIN order_items i ON i.id = c.order_item_id WHERE i.order_id = ?').bind(id).all<{ orderItemId: string; productId: string; productName: string; quantity: number }>();
-  return Response.json({ order: { ...order, items: items.results.map(item => ({ ...item, components: components.results.filter(component => component.orderItemId === item.id) })) } });
+  const variations = await env.DB.prepare('SELECT v.order_item_id AS orderItemId, v.group_id AS groupId, v.group_name AS groupName, v.option_id AS optionId, v.option_name AS optionName, v.price_delta_cents AS priceDeltaCents FROM order_item_variations v JOIN order_items i ON i.id = v.order_item_id WHERE i.order_id = ? ORDER BY v.group_order, v.option_order').bind(id).all<{ orderItemId: string; groupId: string; groupName: string; optionId: string; optionName: string; priceDeltaCents: number }>();
+  return Response.json({ order: { ...order, items: items.results.map(item => {
+    const choices = variations.results.filter(variation => variation.orderItemId === item.id);
+    const selections = Object.fromEntries([...new Set(choices.map(choice => choice.groupId))].map(groupId => [groupId, choices.filter(choice => choice.groupId === groupId).map(choice => choice.optionId)]));
+    return { ...item, components: components.results.filter(component => component.orderItemId === item.id), variations: choices, selections };
+  }) } });
 }
 
 export async function updateOrder(env: Env, id: string, raw: unknown): Promise<Response> {

@@ -14,8 +14,15 @@ describe('order input', () => {
   it('requires a contact method', () => {
     expect(() => parseOrderInput({ ...valid, customerPhone: null })).toThrow('Provide customerEmail or customerPhone');
   });
-  it('rejects duplicate products', () => {
-    expect(() => parseOrderInput({ ...valid, items: [valid.items[0], valid.items[0]] })).toThrow('Duplicate productId');
+  it('allows the same product with different choices as separate lines', () => {
+    const items = [
+      { productId: 'product-1', quantity: 1, selections: { portion: ['small'] } },
+      { productId: 'product-1', quantity: 1, selections: { portion: ['large'] } }
+    ];
+    expect(parseOrderInput({ ...valid, items }).items).toEqual(items);
+  });
+  it('rejects malformed variation choices', () => {
+    expect(() => parseOrderInput({ ...valid, items: [{ productId: 'product-1', quantity: 1, selections: { portion: 'large' } }] })).toThrow('Invalid selected options');
   });
   it('rejects a calendar date that rolls into the next month', () => {
     expect(() => parseOrderInput({ ...valid, fulfillmentDate: '2026-02-31' })).toThrow('fulfillmentDate');

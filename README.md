@@ -7,8 +7,8 @@ created: 2026-10-30
 updated: 2026-10-30
 tags: [powerup-cloud, cloudflare, meal-prep, operations]
 last_reviewed: 2026-10-30
-source_basis: Owner-directed project scope in this session, workspace business reference, Cloudflare documentation, GitHub deployment run, and live endpoint checks
-verification_status: Production Worker, D1, R2, custom domains, and first staff login deployed and checked on 2026-10-30
+source_basis: Owner-directed project scope, workspace business reference, public Power Up Grill storefront, Cloudflare documentation, GitHub deployment runs, and live endpoint checks
+verification_status: Production Worker, D1, R2, custom domains, staff login, and base catalog checked on 2026-10-30; expanded product editor and storefront details pending deployment
 ---
 
 # PowerUp Cloud
@@ -24,7 +24,7 @@ PowerUp Cloud is the planned two-part management dashboard for Power Up Sports a
 
 The [production deploy action](https://github.com/Redshirt-Cloud/powerup-cloud/actions/runs/41127804805) completed on 2026-10-30. The [health endpoint](https://api.powerupwv.com/health) returned `200` with `{"status":"ok","database":"ok"}`; the [admin page](https://admin.powerupwv.com/) returned `200` over valid HTTPS; an unauthenticated staff endpoint returned `401`; and the initial staff login and authenticated session both returned `200`.
 
-The Worker serves the staff dashboard as [static assets](https://developers.cloudflare.com/workers/static-assets/binding/) and the API. It binds `powerup-cloud-public` and `powerup-cloud-private` through the [R2 Workers API](https://developers.cloudflare.com/r2/get-started/workers-api/). The public bucket is connected to `cdn.powerupwv.com`; the private bucket has no public domain. Neither bucket is used by an upload endpoint yet. Files placed in the public bucket are reachable through the CDN domain, so private files belong only in the private bucket behind authenticated Worker routes. [Cloudflare R2 public bucket guidance](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+The Worker serves the staff dashboard as [static assets](https://developers.cloudflare.com/workers/static-assets/binding/) and the API. It binds `powerup-cloud-public` and `powerup-cloud-private` through the [R2 Workers API](https://developers.cloudflare.com/r2/get-started/workers-api/). The public bucket is connected to `cdn.powerupwv.com`; the private bucket has no public domain. Staff can upload product photos to the public bucket through authenticated Worker routes. Files placed there are reachable through the CDN domain, so private files belong only in the private bucket behind authenticated Worker routes. [Cloudflare R2 public bucket guidance](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
 This repository is a new Cloudflare Worker and D1 application. The [original Kitchenasty project](https://github.com/mighty840/kitchenasty) remains a reference for features we may bring in selectively. The old fork's code has been removed from this repository.
 
@@ -35,6 +35,8 @@ This repository is a new Cloudflare Worker and D1 application. The [original Kit
 - Weekly and monthly subscriptions with editable future occurrences. The first date anchors the schedule; monthly dates at the end of a short month move to its last day. Subscription edits rebuild future orders still in `new` status. Orders already progressed keep their original details.
 - Ingredients with serving size, calories, protein, carbs, fat, fiber, sugar, sodium, allergens, and notes.
 - Individual products with ingredient quantities, plus combos containing products. Order items preserve prices and combo contents at order time.
+- Product details, photos, nutrition labels, publication controls, and reusable option groups with product-specific choices and prices. Manual and recurring orders retain selected options and their price snapshots. [Storefront import research](docs/storefront-product-research.md)
+- A staff-selectable dark theme in the dashboard.
 - Order source tracking for staff, website, Facebook, phone, or other channels.
 - Manual unpaid/paid/refunded state; no payment capture or customer checkout.
 - GitHub pull request checks and deployment to Cloudflare on merge to `main`.

@@ -3,6 +3,7 @@ import { date, object, optional } from './input';
 import { parseOrderInput, type OrderInput } from './order-input';
 import { itemStatements, pricedItems } from './orders';
 import { addDays, kitchenToday, occurrenceDates, type Cadence } from './recurrence';
+import type { Selection } from './variations';
 
 type Subscription = {
   id: string; customer_name: string; customer_email: string | null; customer_phone: string | null;
@@ -10,11 +11,11 @@ type Subscription = {
   status: 'active' | 'paused' | 'cancelled'; notes: string | null;
 };
 
-type SubscriptionItem = { product_id: string; quantity: number };
+type SubscriptionItem = { product_id: string; quantity: number; selections: Selection };
 
 async function subscriptionItems(env: Env, id: string): Promise<SubscriptionItem[]> {
-  const rows = await env.DB.prepare('SELECT product_id, quantity FROM subscription_items WHERE subscription_id = ?').bind(id).all<SubscriptionItem>();
-  return rows.results;
+  const rows = await env.DB.prepare('SELECT product_id, quantity, selections_json AS selectionsJson FROM subscription_lines WHERE subscription_id = ? ORDER BY sort_order').bind(id).all<{ product_id: string; quantity: number; selectionsJson: string }>();
+  return rows.results.map(row => ({ product_id: row.product_id, quantity: row.quantity, selections: JSON.parse(row.selectionsJson) as Selection }));
 }
 
 export async function listSubscriptions(env: Env): Promise<Response> {
@@ -26,7 +27,7 @@ export async function getSubscription(env: Env, id: string): Promise<Response> {
   const row = await env.DB.prepare('SELECT id, customer_name AS customerName, customer_email AS customerEmail, customer_phone AS customerPhone, start_date AS startDate, end_date AS endDate, cadence, fulfillment_method AS fulfillmentMethod, status, notes FROM subscriptions WHERE id = ?').bind(id).first();
   if (!row) return Response.json({ error: 'Subscription not found' }, { status: 404 });
   const items = await subscriptionItems(env, id);
-  return Response.json({ subscription: { ...row, items: items.map(item => ({ productId: item.product_id, quantity: item.quantity })) } });
+  return Response.json({ subscription: { ...row, items: items.map(item => ({ productId: item.product_id, quantity: item.quantity, selections: item.selections })) } });
 }
 
 export async function saveSubscription(env: Env, raw: unknown, id?: string): Promise<Response> {
@@ -52,8 +53,8 @@ export async function saveSubscription(env: Env, raw: unknown, id?: string): Pro
       .bind(input.customerName, input.customerEmail, input.customerPhone, startDate, endDate, cadence, input.fulfillmentMethod, status, optional(data.notes, 'notes'), id)
       : env.DB.prepare('INSERT INTO subscriptions (id, customer_name, customer_email, customer_phone, start_date, end_date, cadence, fulfillment_method, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         .bind(subscriptionId, input.customerName, input.customerEmail, input.customerPhone, startDate, endDate, cadence, input.fulfillmentMethod, status, optional(data.notes, 'notes')),
-    env.DB.prepare('DELETE FROM subscription_items WHERE subscription_id = ?').bind(subscriptionId),
-    ...input.items.map(item => env.DB.prepare('INSERT INTO subscription_items (subscription_id, product_id, quantity) VALUES (?, ?, ?)').bind(subscriptionId, item.productId, item.quantity))
+    env.DB.prepare('DELETE FROM subscription_lines WHERE subscription_id = ?').bind(subscriptionId),
+    ...input.items.map((item, index) => env.DB.prepare('INSERT INTO subscription_lines (id, subscription_id, product_id, quantity, selections_json, sort_order) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), subscriptionId, item.productId, item.quantity, JSON.stringify(item.selections), index))
   ];
   await env.DB.batch(statements);
   if (status === 'active') await syncSubscription(env, subscriptionId, today, addDays(today, 45));
@@ -77,7 +78,7 @@ async function syncSubscription(env: Env, id: string, from: string, through: str
     const input: OrderInput = {
       source: 'staff', customerName: sub.customer_name, customerEmail: sub.customer_email, customerPhone: sub.customer_phone,
       fulfillmentDate, fulfillmentMethod: sub.fulfillment_method, notes: sub.notes,
-      items: items.map(item => ({ productId: item.product_id, quantity: item.quantity }))
+      items: items.map(item => ({ productId: item.product_id, quantity: item.quantity, selections: item.selections }))
     };
     const priced = await pricedItems(env, input);
     await env.DB.batch([

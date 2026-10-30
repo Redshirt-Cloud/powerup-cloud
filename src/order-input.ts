@@ -1,4 +1,5 @@
 import { validDate } from './recurrence';
+import type { Selection } from './variations';
 
 export type OrderInput = {
   source: 'staff' | 'website' | 'facebook' | 'phone' | 'other';
@@ -8,7 +9,7 @@ export type OrderInput = {
   fulfillmentDate: string;
   fulfillmentMethod: 'pickup' | 'delivery';
   notes: string | null;
-  items: { productId: string; quantity: number }[];
+  items: { productId: string; quantity: number; selections: Selection }[];
 };
 
 export function parseOrderInput(value: unknown): OrderInput {
@@ -31,9 +32,17 @@ export function parseOrderInput(value: unknown): OrderInput {
     const row = item as Record<string, unknown>;
     const productId = requiredString(row.productId, 'productId', 100);
     if (!Number.isInteger(row.quantity) || (row.quantity as number) < 1 || (row.quantity as number) > 1000) throw new Error('quantity must be 1 to 1000');
-    return { productId, quantity: row.quantity as number };
+    const selections: Selection = {};
+    if (row.selections !== undefined && row.selections !== null) {
+      if (typeof row.selections !== 'object' || Array.isArray(row.selections) || Object.keys(row.selections).length > 30) throw new Error('Invalid selections');
+      for (const [groupId, optionIds] of Object.entries(row.selections)) {
+        requiredString(groupId, 'groupId', 100);
+        if (!Array.isArray(optionIds) || optionIds.length > 20) throw new Error('Invalid selected options');
+        selections[groupId] = optionIds.map(optionId => requiredString(optionId, 'optionId', 100));
+      }
+    }
+    return { productId, quantity: row.quantity as number, selections };
   });
-  if (new Set(items.map(item => item.productId)).size !== items.length) throw new Error('Duplicate productId');
   return {
     source: source as OrderInput['source'], customerName, customerEmail, customerPhone,
     fulfillmentDate, fulfillmentMethod: data.fulfillmentMethod, notes: optionalString(data.notes, 'notes', 2000), items
