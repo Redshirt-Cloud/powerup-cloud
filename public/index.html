@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142b29">
+  <title>PowerUp Cloud · Kitchen</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main id="login" class="login-shell" hidden>
+    <form id="login-form" class="login-card">
+      <span class="eyebrow">POWERUP CLOUD</span>
+      <h1>Kitchen command center</h1>
+      <p>Sign in to manage meal prep orders, subscriptions, and the menu.</p>
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="button primary" type="submit">Sign in</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <div id="workspace" class="app-shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">P<span>+</span></span><span><strong>PowerUp</strong><small>CLOUD · GRILL</small></span></div>
+      <nav aria-label="Main navigation">
+        <button data-view="dashboard" class="nav-item active"><span>◫</span> Dashboard</button>
+        <button data-view="orders" class="nav-item"><span>☷</span> Orders</button>
+        <button data-view="subscriptions" class="nav-item"><span>↻</span> Subscriptions</button>
+        <button data-view="catalog" class="nav-item"><span>▦</span> Catalog</button>
+      </nav>
+      <div class="sidebar-bottom"><span id="staff-name"></span><button id="logout" class="text-button">Sign out</button></div>
+    </aside>
+    <div class="main-area">
+      <header class="topbar"><div><span class="eyebrow">POWER UP GRILL</span><h1 id="page-title">Dashboard</h1></div><div class="header-actions"><span id="today-label"></span><button id="create-button" class="button primary">+ Create new</button></div></header>
+      <div id="toast" class="toast" role="status" hidden></div>
+      <section id="view" class="content"></section>
+    </div>
+  </div>
+
+  <dialog id="editor"><div class="dialog-head"><div><span class="eyebrow">POWERUP CLOUD</span><h2 id="editor-title">Create new</h2></div><button id="close-editor" class="icon-button" aria-label="Close">×</button></div><div id="editor-body"></div></dialog>
+</body>
+</html>

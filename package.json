@@ -1,32 +1,25 @@
 {
-  "name": "kitchenasty",
-  "version": "0.3.2",
+  "name": "powerup-cloud",
+  "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "type": "module",
   "scripts": {
-    "dev:server": "npm run dev -w packages/server",
-    "dev:admin": "npm run dev -w packages/admin",
-    "dev:storefront": "npm run dev -w packages/storefront",
-    "dev:docs": "npm run dev -w packages/docs",
-    "dev:mobile": "npm run start -w packages/mobile",
-    "build": "npm run build -w packages/shared && npm run build -w packages/server && npm run build -w packages/admin && npm run build -w packages/storefront",
-    "build:docs": "npm run build -w packages/docs",
-    "lint": "eslint packages/*/src --ext .ts,.tsx",
-    "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "npm run test -w packages/shared && npm run test:unit -w packages/server",
-    "test:integration": "npm run test:integration -w packages/server",
-    "test:e2e": "npx playwright test"
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && node --check public/app.js",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote --config wrangler.deploy.json",
+    "deploy": "wrangler deploy --config wrangler.deploy.json",
+    "prepare:deploy": "node scripts/prepare-deploy-config.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "@types/node": "^22.0.0",
-    "playwright": "^1.58.2",
-    "prisma": "^5.22.0",
-    "typescript": "^5.7.0"
+    "@cloudflare/workers-types": "5.20261030.1",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5",
+    "wrangler": "4.156.0"
   },
-  "dependencies": {
-    "@prisma/client": "^5.22.0"
+  "engines": {
+    "node": ">=22"
   }
 }

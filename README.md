@@ -1,257 +1,90 @@
-<p align="center">
-  <a href="https://github.com/mighty840/kitchenasty">
-    <img src="assets/logo.svg" alt="KitchenAsty Logo" width="420" />
-  </a>
-</p>
-
-<h1 align="center">KitchenAsty</h1>
-
-<p align="center">
-  <em>Self-hosted restaurant ordering, reservations, and management — all in one platform.</em>
-</p>
-
-<p align="center">
-  <a href="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml"><img src="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://mighty840.github.io/kitchenasty/"><img src="https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=readthedocs&logoColor=white" alt="Docs" /></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white" alt="TypeScript" /></a>
-  <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React" /></a>
-  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
-  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
-  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-blue?logo=docker&logoColor=white" alt="Docker" /></a>
-</p>
-
-<p align="center">
-  <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white" alt="Express" /></a>
-  <a href="https://www.prisma.io/"><img src="https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma&logoColor=white" alt="Prisma" /></a>
-  <a href="https://socket.io/"><img src="https://img.shields.io/badge/Socket.IO-4-010101?logo=socketdotio&logoColor=white" alt="Socket.IO" /></a>
-  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" /></a>
-  <a href="https://playwright.dev/"><img src="https://img.shields.io/badge/Playwright-E2E-2EAD33?logo=playwright&logoColor=white" alt="Playwright" /></a>
-  <a href="https://vite.dev/"><img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
-</p>
-
-<p align="center">
-  <a href="https://www.producthunt.com/products/kitchenasty?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kitchenasty" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="KitchenAsty - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
-</p>
-
-<p align="center">
-  <a href="https://demo.kitchenasty.com"><strong>Live Demo</strong></a> &middot;
-  <a href="#quick-start">Quick Start</a> &middot;
-  <a href="https://mighty840.github.io/kitchenasty/">Docs</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=bug_report.md">Report Bug</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=feature_request.md">Request Feature</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/discussions">Discussions</a>
-</p>
-
+---
+id: powerup-cloud-readme
+title: PowerUp Cloud
+type: project-readme
+business: Power Up Sports and Wellness
+created: 2026-10-30
+updated: 2026-10-30
+tags: [powerup-cloud, cloudflare, meal-prep, operations]
+last_reviewed: 2026-10-30
+source_basis: Owner-directed project scope in this session, workspace business reference, and Cloudflare Workers and R2 documentation
+verification_status: Domain plan owner confirmed; local implementation verified; production deployment pending
 ---
 
-> **Try it now:** [demo.kitchenasty.com](https://demo.kitchenasty.com) (storefront) | [demo.kitchenasty.com/admin](https://demo.kitchenasty.com/admin/) (admin — `admin@kitchenasty.com` / `admin123`)
->
-> The demo resets every 2 hours and is rate-limited. See the [docs](https://mighty840.github.io/kitchenasty/guide/live-demo.html) for details.
+# PowerUp Cloud
 
----
+PowerUp Cloud is the planned two-part management dashboard for Power Up Sports and Wellness. Its first module manages Power Up Grill meal prep orders. The second business module will use the same platform as its requirements are defined. The customer-facing Power Up website can later use this API for ordering; checkout and payment processing are outside the current scope.
 
-KitchenAsty enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run day-to-day operations from a single admin panel. Built as a modern TypeScript monorepo with separate admin and storefront frontends, a REST API with real-time WebSocket updates, and a full test suite with 350+ tests.
+## Planned domains
 
----
+- `admin.powerupwv.com`: staff dashboard for the business management modules.
+- `app.powerupwv.com`: reserved for a future customer-facing app.
+- `api.powerupwv.com`: shared Worker API for the dashboards and main Power Up website.
+- `cdn.powerupwv.com`: public assets stored in an R2 bucket, such as menu photos.
 
-## Features
+The Worker now serves the staff dashboard as [static assets](https://developers.cloudflare.com/workers/static-assets/binding/) and the API. The dashboard is allowed on `admin.powerupwv.com` and local development hosts; the API can also be mapped to `api.powerupwv.com`. None of the custom domains are configured yet. The Worker will use an [R2 bucket binding](https://developers.cloudflare.com/r2/get-started/workers-api/) for object writes and any private reads. Cloudflare can connect an R2 bucket directly to [`cdn.powerupwv.com` as a custom domain](https://developers.cloudflare.com/r2/buckets/public-buckets/) for public reads and caching. The domain is the delivery address; the bucket remains the storage. Private files should stay in a separate private bucket and be served through authenticated Worker routes, since a public R2 custom domain makes stored objects reachable by anyone with their URLs. [Cloudflare R2 public bucket guidance](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
-### Ordering & Payments
+The Worker configuration now binds `powerup-cloud-public` and `powerup-cloud-private`. The public bucket is intended for `cdn.powerupwv.com`; the private bucket has no public domain. Neither bucket is used by an upload endpoint yet.
 
-- Online ordering with delivery/pickup, scheduling, and guest checkout
-- Stripe payment integration with webhooks, plus cash-on-delivery
-- Real-time order tracking with visual progress and Socket.IO updates
-- Kitchen display — live Kanban board with one-click status progression
-- Coupon system with percentage, fixed, and free-delivery discount types
+This repository is a new Cloudflare Worker and D1 application. The [original Kitchenasty project](https://github.com/mighty840/kitchenasty) remains a reference for features we may bring in selectively. The old fork's code has been removed from this branch.
 
-### Menu & Kitchen
+## Current capabilities
 
-- Category management with nesting and menu item CRUD
-- Options, allergens, and mealtime tagging per item
-- Image uploads (JPEG/PNG/WebP/GIF, 5 MB max) with preview
-- Stock tracking with automatic availability updates
+- Staff login and a dashboard showing today's work and a five-week calendar.
+- Manual order creation, editing, status updates, and payment tracking.
+- Weekly and monthly subscriptions with editable future occurrences. The first date anchors the schedule; monthly dates at the end of a short month move to its last day. Subscription edits rebuild future orders still in `new` status. Orders already progressed keep their original details.
+- Ingredients with serving size, calories, protein, carbs, fat, fiber, sugar, sodium, allergens, and notes.
+- Individual products with ingredient quantities, plus combos containing products. Order items preserve prices and combo contents at order time.
+- Order source tracking for staff, website, Facebook, phone, or other channels.
+- Manual unpaid/paid/refunded state; no payment capture or customer checkout.
+- GitHub pull request checks and deployment to Cloudflare on merge to `main`.
 
-### Reservations & Reviews
+Staff routes accept the dashboard's secure session cookie or a secret bearer token for trusted service use. Do not put that token in the public website. A future customer order API needs separate authentication, abuse controls, and payment design.
 
-- Customer booking with time-slot availability checking
-- Admin reservation workflow: pending, confirmed, seated, completed
-- Table assignment with capacity tracking and reservation protection
-- Customer reviews (1-5 stars) with admin moderation (approve/reject)
+## Local setup
 
-### Staff Management
-
-- Three-tier role system: Super Admin, Manager, Staff
-- Email-based staff invitation with secure single-use tokens (7-day expiry)
-- Role-based admin navigation — each role sees only their permitted pages
-- Staff CRUD: list, search, filter by role, edit, activate/deactivate
-
-### Settings & Configuration
-
-- Centralized admin settings dashboard with clickable card grid
-- 7 settings groups: General, Orders, Reservations, Mail, Payments, Reviews, Advanced
-- DB-first config resolution for email, Stripe, and PayPal with env var fallback
-- Secret masking for sensitive fields (API keys, passwords) in the UI and API
-- Role-based settings access (MANAGER vs SUPER_ADMIN)
-- Test email functionality to verify SMTP configuration
-
-### Storefront Templates
-
-- 10 pre-designed templates (Classic, Modern, Rustic, Elegant, Minimal, Bold, Coastal, Garden, Urban, Artisan)
-- One-click template switching from admin settings with live preview
-- Each template includes header, hero, features section, and footer
-- Templates respect restaurant branding (colors, logo, name)
-
-### Analytics & Automation
-
-- Dashboard with real-time metrics: orders, revenue, reservations, customers
-- Interactive charts: revenue trends, daily orders, hourly patterns, category breakdown
-- Branded HTML email notifications for order and reservation confirmations
-- API docs via Swagger UI at `/api/docs`
-
-### Internationalization
-
-- i18n with react-i18next and language switcher
-- English, Spanish, French, German, Italian, and Portuguese translations
-
-### Observability & Developer Tools
-
-- Structured logging with Pino (JSON in production, pretty-printed in dev)
-- Request tracing with unique `x-request-id` per request
-- API metrics dashboard with response time charts and endpoint performance
-- Audit logging for all admin mutations (SUPER_ADMIN only)
-
-### Developer Experience
-
-- TypeScript strict mode across the entire monorepo
-- Vitest unit/integration + Playwright E2E (350+ tests)
-- GitHub Actions CI: lint, test, audit, build, and artifact packaging
-- Docker Compose for local PostgreSQL, npm workspaces for monorepo
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/) |
-| **Frontend (Admin)** | [React 18](https://react.dev/) + [Vite](https://vite.dev/) |
-| **Frontend (Storefront)** | [React 18](https://react.dev/) + [Vite](https://vite.dev/) |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/) |
-| **Auth** | JWT ([jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)) + [bcrypt](https://github.com/dcodeIO/bcrypt.js) |
-| **Validation** | [Zod](https://zod.dev/) |
-| **Real-time** | [Socket.IO](https://socket.io/) |
-| **Charts** | [Recharts](https://recharts.org/) |
-| **File Upload** | [Multer](https://github.com/expressjs/multer) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
-| **Logging** | [Pino](https://getpino.io/) |
-| **Testing** | [Vitest](https://vitest.dev/) + [Supertest](https://github.com/ladjs/supertest) + [Playwright](https://playwright.dev/) |
-| **CI/CD** | [GitHub Actions](https://github.com/features/actions) |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Node.js** 22+ &nbsp;|&nbsp; **Docker** (for PostgreSQL) &nbsp;|&nbsp; **npm** 10+
-
-### 1. Clone & install
+Use Node 22 or newer.
 
 ```bash
-git clone git@github.com:mighty840/kitchenasty.git
-cd kitchenasty
-npm install
+npm ci
+cp .dev.vars.example .dev.vars
+# Replace both example secrets with separate random values of at least 32 characters.
+npm run db:migrate:local
+npm run dev
 ```
 
-### 2. Start the database
+Open `http://localhost:8787`. Before the first login, create the initial staff user by calling `POST /api/v1/bootstrap/user` with the `STAFF_API_TOKEN` bearer credential and a JSON body containing `email`, `displayName`, and a password of at least 12 characters. This endpoint stops accepting users after the first account exists. Then sign in through the dashboard. Keep the setup token and `AUTH_PEPPER` out of frontend code and Git. `AUTH_PEPPER` must remain stable: changing it invalidates existing password hashes.
+
+The checked-in D1 UUID is a local-development placeholder. The deployment job creates a separate ignored config containing the real UUID from a GitHub secret.
 
 ```bash
-docker compose up -d
+npm run check
+curl http://localhost:8787/health
 ```
 
-### 3. Set up environment & migrate
+Staff routes are under `/api/v1/staff`. For example, the dashboard can create a product with `POST /api/v1/staff/products` using JSON `{"name":"Chicken bowl","priceCents":1299,"kind":"individual"}`. Create an order with `POST /api/v1/staff/orders` and:
 
-```bash
-cp packages/server/.env.example packages/server/.env
-npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma
-npx -w packages/server prisma db seed
+```json
+{
+  "source": "phone",
+  "customerName": "Example Customer",
+  "customerPhone": "304-555-0100",
+  "fulfillmentDate": "2026-11-06",
+  "fulfillmentMethod": "pickup",
+  "items": [{ "productId": "<created-product-id>", "quantity": 2 }]
+}
 ```
 
-### 4. Start development servers
+Prices are read from products when the order is created and copied into order items. Product prices cannot be supplied by the caller. Kitchen dates use the `America/New_York` timezone.
 
-```bash
-npm run dev:server      # API server → http://localhost:3000
-npm run dev:admin       # Admin panel → http://localhost:5173
-npm run dev:storefront  # Storefront  → http://localhost:5174
-```
+## Deployment setup
 
----
+1. Create a D1 database named `powerup-cloud` in the intended Cloudflare account and record its UUID.
+2. Create a Cloudflare API token for the intended account with permission to create and edit this Worker, edit D1, and write zone Workers Routes so the workflow can deploy code, run migrations, and attach the two custom domains. [Cloudflare permissions guidance](https://developers.cloudflare.com/workers/authorization/)
+3. Create R2 buckets `powerup-cloud-public` and `powerup-cloud-private`. Connect `cdn.powerupwv.com` to the public bucket only; leave the private bucket private.
+4. Create a Worker named `powerup-cloud-api` in Cloudflare so its secrets can be set before the first code deployment. In its **Settings → Variables and Secrets**, add `STAFF_API_TOKEN` and `AUTH_PEPPER` as **Secret** values. Use separate random values of at least 32 characters, and keep the pepper safely recorded: changing it invalidates existing password hashes. [Cloudflare secret setup](https://developers.cloudflare.com/workers/configuration/secrets/)
+5. Add GitHub `production` environment variables `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_D1_DATABASE_ID`, and the environment secret `CLOUDFLARE_API_TOKEN` for CI authentication. The application secrets stay in Cloudflare and are preserved by later Wrangler deployments. [Cloudflare deployment behavior](https://developers.cloudflare.com/workers/wrangler/commands/workers/)
+6. Open a pull request from the feature branch. The `Check` workflow tests code and runs D1 migrations locally. Merging to `main` runs the `Deploy Worker` workflow, which applies migrations remotely before deploying the Worker, its dashboard assets, R2 bindings, and custom domains. Wrangler checks that both application secrets are already present.
+7. Create the initial user through the bootstrap endpoint using the setup token, then sign in at `admin.powerupwv.com`.
 
-## Project Structure
-
-```
-kitchenasty/
-├── .github/workflows/     # CI pipeline
-├── assets/                # Logo and brand assets
-├── e2e/                   # Playwright E2E tests
-│   ├── admin/             #   Admin panel tests
-│   └── storefront/        #   Customer storefront tests
-├── packages/
-│   ├── admin/             # React admin panel (Vite, port 5173)
-│   ├── docs/              # VitePress documentation site
-│   ├── server/            # Express API server (port 3000)
-│   ├── shared/            # Shared types and constants
-│   └── storefront/        # React customer storefront (Vite, port 5174)
-├── prisma/
-│   ├── schema.prisma      # Database schema (22 models)
-│   └── seed.ts            # Sample data seeder
-├── docker-compose.yml     # PostgreSQL for local dev
-├── playwright.config.ts   # E2E test configuration
-└── PLAN.md                # Full feature roadmap
-```
-
----
-
-## Documentation
-
-Full documentation is available at **[mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/)**, including:
-
-- [Getting Started Guide](https://mighty840.github.io/kitchenasty/guide/introduction.html)
-- [Self-Hosting Guide](https://mighty840.github.io/kitchenasty/self-hosting/overview.html) — server setup, Docker, reverse proxy, SSL, backups
-- [Mobile App Publishing](https://mighty840.github.io/kitchenasty/mobile-app/overview.html) — developer accounts, building, app store submission
-- [API Reference](https://mighty840.github.io/kitchenasty/api/overview.html) — all endpoints with request/response schemas
-- [Configuration](https://mighty840.github.io/kitchenasty/configuration/environment-variables.html) — environment variables, payments, email, social login
-
-Interactive Swagger UI is served at [`/api/docs`](http://localhost:3000/api/docs) when the server is running.
-
----
-
-## Contributing
-
-We welcome contributions of all kinds! Please read our **[Contributing Guide](CONTRIBUTING.md)** to get started.
-
-1. Fork the repository and create a feature branch from `main`
-2. Make changes and add tests
-3. Ensure all tests pass: `npm test && npm run test:e2e`
-4. Push and open a pull request
-
-Looking for a good starting point? Check out issues labeled [`good first issue`](https://github.com/mighty840/kitchenasty/labels/good%20first%20issue).
-
-See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
-
----
-
-## Community
-
-- [GitHub Discussions](https://github.com/mighty840/kitchenasty/discussions) — Ask questions, share ideas, get help
-- [Issue Tracker](https://github.com/mighty840/kitchenasty/issues) — Report bugs and request features
-- [Security Policy](SECURITY.md) — Report vulnerabilities responsibly
-- [Code of Conduct](CODE_OF_CONDUCT.md) — Our community standards
-
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+The deployment workflow will fail safely if the database UUID, Cloudflare credentials, or Cloudflare-side application secrets are absent. Password hashing uses PBKDF2 at Cloudflare's [100,000-iteration runtime ceiling](https://github.com/cloudflare/workerd/issues/1346) plus a server-side secret; measure login CPU time in the target account, especially on the [Workers Free plan's 10 ms CPU limit](https://developers.cloudflare.com/workers/platform/limits/). Before handling real customer data, review data retention, backup, and staff access policies.
