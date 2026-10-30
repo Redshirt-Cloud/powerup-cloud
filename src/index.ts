@@ -1,5 +1,6 @@
 import { bootstrapUser, login, logout, sameOriginMutation, staffIdentity, type Env as AuthEnv } from './auth';
-import { getProduct, listCategories, listIngredients, listProducts, saveIngredient, saveProduct } from './catalog';
+import { deleteProductImage, getProduct, listCategories, listIngredients, listProducts, saveIngredient, saveProduct, uploadProductImage } from './catalog';
+import { listVariationGroups, saveVariationGroup } from './variations';
 import { object } from './input';
 import { createOrder, getOrder, listOrders, updateOrder } from './orders';
 import { getSubscription, listSubscriptions, saveSubscription, syncSubscriptions } from './subscriptions';
@@ -7,6 +8,7 @@ import { addDays, kitchenToday, validDate } from './recurrence';
 
 interface Env extends AuthEnv {
   ASSETS: Fetcher;
+  PUBLIC_ASSETS: R2Bucket;
 }
 
 function json(value: unknown, status = 200): Response {
@@ -53,11 +55,19 @@ export default {
       if (pathname === '/api/v1/auth/logout' && request.method === 'POST') return await logout(request, env);
       if (pathname === '/api/v1/staff/ingredients' && request.method === 'GET') return await listIngredients(env);
       if (pathname === '/api/v1/staff/categories' && request.method === 'GET') return await listCategories(env);
+      if (pathname === '/api/v1/staff/variation-groups' && request.method === 'GET') return await listVariationGroups(env);
+      if (pathname === '/api/v1/staff/variation-groups' && request.method === 'POST') return await saveVariationGroup(env, await body(request));
+      const variationGroupId = pathname.match(/^\/api\/v1\/staff\/variation-groups\/([a-f0-9-]+)$/)?.[1];
+      if (variationGroupId && request.method === 'PATCH') return await saveVariationGroup(env, await body(request), variationGroupId);
       if (pathname === '/api/v1/staff/ingredients' && request.method === 'POST') return await saveIngredient(env, await body(request));
       const ingredientId = pathname.match(/^\/api\/v1\/staff\/ingredients\/([a-f0-9-]+)$/)?.[1];
       if (ingredientId && request.method === 'PATCH') return await saveIngredient(env, await body(request), ingredientId);
       if (pathname === '/api/v1/staff/products' && request.method === 'GET') return await listProducts(env);
       if (pathname === '/api/v1/staff/products' && request.method === 'POST') return await saveProduct(env, await body(request));
+      const productImageParentId = pathname.match(/^\/api\/v1\/staff\/products\/([a-f0-9-]+)\/images$/)?.[1];
+      if (productImageParentId && request.method === 'POST') return await uploadProductImage(request, env, productImageParentId);
+      const productImageMatch = pathname.match(/^\/api\/v1\/staff\/products\/([a-f0-9-]+)\/images\/([a-f0-9-]+)$/);
+      if (productImageMatch && request.method === 'DELETE') return await deleteProductImage(env, productImageMatch[1], productImageMatch[2]);
       const productId = pathname.match(/^\/api\/v1\/staff\/products\/([a-f0-9-]+)$/)?.[1];
       if (productId && request.method === 'GET') return await getProduct(env, productId);
       if (productId && request.method === 'PATCH') return await saveProduct(env, await body(request), productId);
@@ -80,7 +90,7 @@ export default {
       if (subscriptionId && request.method === 'PATCH') return await saveSubscription(env, await body(request), subscriptionId);
       return json({ error: 'Not found' }, 404);
     } catch (error) {
-      if (error instanceof Error && /^(Expected|Invalid|Provide|Duplicate|A combo|Only combos|Add ingredients|Product ingredients|Combo components|One or more|Order total|Order date|Completed orders|Recurring order|No order|endDate|startDate|name|priceCents|weeklyPriceCents|categoryId|servingSize|servings|quantity|customer|fulfillment|items|notes|calories|proteinG|carbsG|fatG|fiberG|sugarG|sodiumMg|allergens|description|Request body)/.test(error.message)) return json({ error: error.message }, 400);
+      if (error instanceof Error && /^(Expected|Invalid|Provide|Duplicate|Select|Remove this choice|Too many|Variation|options|basePriceCents|A combo|Only combos|Add ingredients|Product ingredients|Combo components|One or more|Order total|Order date|Completed orders|Recurring order|No order|endDate|startDate|name|priceCents|weeklyPriceCents|categoryId|servingSize|servings|quantity|customer|fulfillment|items|notes|calories|proteinG|carbsG|fatG|fiberG|sugarG|sodiumMg|allergens|description|Request body)/.test(error.message)) return json({ error: error.message }, 400);
       console.error('Request failed', error);
       return json({ error: 'Internal server error' }, 500);
     }

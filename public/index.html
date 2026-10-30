@@ -10,6 +10,7 @@
 </head>
 <body>
   <main id="login" class="login-shell" hidden>
+    <button class="button theme-button login-theme-button" type="button" data-theme-toggle aria-label="Toggle dark mode">Dark mode</button>
     <form id="login-form" class="login-card">
       <span class="eyebrow">POWERUP CLOUD</span>
       <h1>Kitchen command center</h1>
@@ -33,7 +34,7 @@
       <div class="sidebar-bottom"><span id="staff-name"></span><button id="logout" class="text-button">Sign out</button></div>
     </aside>
     <div class="main-area">
-      <header class="topbar"><div><span class="eyebrow">POWER UP GRILL</span><h1 id="page-title">Dashboard</h1></div><div class="header-actions"><span id="today-label"></span><button id="create-button" class="button primary">+ Create new</button></div></header>
+      <header class="topbar"><div><span class="eyebrow">POWER UP GRILL</span><h1 id="page-title">Dashboard</h1></div><div class="header-actions"><span id="today-label"></span><button class="button theme-button" type="button" data-theme-toggle aria-label="Toggle dark mode">Dark mode</button><button id="create-button" class="button primary">+ Create new</button></div></header>
       <div id="toast" class="toast" role="status" hidden></div>
       <section id="view" class="content"></section>
     </div>
