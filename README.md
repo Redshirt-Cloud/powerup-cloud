@@ -7,26 +7,26 @@ created: 2026-10-30
 updated: 2026-10-30
 tags: [powerup-cloud, cloudflare, meal-prep, operations]
 last_reviewed: 2026-10-30
-source_basis: Owner-directed project scope in this session, workspace business reference, and Cloudflare Workers and R2 documentation
-verification_status: Domain plan owner confirmed; local implementation verified; production deployment pending
+source_basis: Owner-directed project scope in this session, workspace business reference, Cloudflare documentation, GitHub deployment run, and live endpoint checks
+verification_status: Production Worker, D1, R2, and custom domains deployed and checked on 2026-10-30; first staff login pending
 ---
 
 # PowerUp Cloud
 
 PowerUp Cloud is the planned two-part management dashboard for Power Up Sports and Wellness. Its first module manages Power Up Grill meal prep orders. The second business module will use the same platform as its requirements are defined. The customer-facing Power Up website can later use this API for ordering; checkout and payment processing are outside the current scope.
 
-## Planned domains
+## Domains
 
-- `admin.powerupwv.com`: staff dashboard for the business management modules.
+- [admin.powerupwv.com](https://admin.powerupwv.com/): live staff dashboard for the business management modules.
 - `app.powerupwv.com`: reserved for a future customer-facing app.
-- `api.powerupwv.com`: shared Worker API for the dashboards and main Power Up website.
-- `cdn.powerupwv.com`: public assets stored in an R2 bucket, such as menu photos.
+- [api.powerupwv.com](https://api.powerupwv.com/health): live shared Worker API for the dashboards and future main-website integrations.
+- [cdn.powerupwv.com](https://cdn.powerupwv.com/): live public R2 delivery domain for future assets such as menu photos. The bucket is currently empty.
 
-The Worker now serves the staff dashboard as [static assets](https://developers.cloudflare.com/workers/static-assets/binding/) and the API. The dashboard is allowed on `admin.powerupwv.com` and local development hosts; the API can also be mapped to `api.powerupwv.com`. None of the custom domains are configured yet. The Worker will use an [R2 bucket binding](https://developers.cloudflare.com/r2/get-started/workers-api/) for object writes and any private reads. Cloudflare can connect an R2 bucket directly to [`cdn.powerupwv.com` as a custom domain](https://developers.cloudflare.com/r2/buckets/public-buckets/) for public reads and caching. The domain is the delivery address; the bucket remains the storage. Private files should stay in a separate private bucket and be served through authenticated Worker routes, since a public R2 custom domain makes stored objects reachable by anyone with their URLs. [Cloudflare R2 public bucket guidance](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+The [production deploy action](https://github.com/Redshirt-Cloud/powerup-cloud/actions/runs/41127804805) completed on 2026-10-30. The [health endpoint](https://api.powerupwv.com/health) returned `200` with `{"status":"ok","database":"ok"}`; the [admin page](https://admin.powerupwv.com/) returned `200` over valid HTTPS; and an unauthenticated staff endpoint returned `401`.
 
-The Worker configuration now binds `powerup-cloud-public` and `powerup-cloud-private`. The public bucket is intended for `cdn.powerupwv.com`; the private bucket has no public domain. Neither bucket is used by an upload endpoint yet.
+The Worker serves the staff dashboard as [static assets](https://developers.cloudflare.com/workers/static-assets/binding/) and the API. It binds `powerup-cloud-public` and `powerup-cloud-private` through the [R2 Workers API](https://developers.cloudflare.com/r2/get-started/workers-api/). The public bucket is connected to `cdn.powerupwv.com`; the private bucket has no public domain. Neither bucket is used by an upload endpoint yet. Files placed in the public bucket are reachable through the CDN domain, so private files belong only in the private bucket behind authenticated Worker routes. [Cloudflare R2 public bucket guidance](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
-This repository is a new Cloudflare Worker and D1 application. The [original Kitchenasty project](https://github.com/mighty840/kitchenasty) remains a reference for features we may bring in selectively. The old fork's code has been removed from this branch.
+This repository is a new Cloudflare Worker and D1 application. The [original Kitchenasty project](https://github.com/mighty840/kitchenasty) remains a reference for features we may bring in selectively. The old fork's code has been removed from this repository.
 
 ## Current capabilities
 
@@ -55,7 +55,7 @@ npm run dev
 
 Open `http://localhost:8787`. Before the first login, create the initial staff user by calling `POST /api/v1/bootstrap/user` with the `STAFF_API_TOKEN` bearer credential and a JSON body containing `email`, `displayName`, and a password of at least 12 characters. This endpoint stops accepting users after the first account exists. Then sign in through the dashboard. Keep the setup token and `AUTH_PEPPER` out of frontend code and Git. `AUTH_PEPPER` must remain stable: changing it invalidates existing password hashes.
 
-The checked-in D1 UUID is a local-development placeholder. The deployment job creates a separate ignored config containing the real UUID from a GitHub secret.
+The checked-in D1 UUID is a local-development placeholder. The deployment job creates a separate ignored config containing the real UUID from a GitHub environment variable.
 
 ```bash
 npm run check
