@@ -8,7 +8,7 @@ updated: 2026-10-30
 tags: [powerup-cloud, cloudflare, meal-prep, operations]
 last_reviewed: 2026-10-30
 source_basis: Owner-directed project scope, workspace business reference, public Power Up Grill storefront, Cloudflare documentation, GitHub deployment runs, and live endpoint checks
-verification_status: Production Worker, D1, R2, custom domains, staff login, and base catalog checked on 2026-10-30; expanded product editor and storefront details pending deployment
+verification_status: Production Worker, D1, R2, custom domains, staff login, expanded product catalog, variation groups, and CDN image checked on 2026-10-30
 ---
 
 # PowerUp Cloud
