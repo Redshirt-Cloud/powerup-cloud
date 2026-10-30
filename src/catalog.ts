@@ -49,12 +49,17 @@ function relations(value: unknown, kind: 'ingredient' | 'component'): ProductRel
 }
 
 export async function listProducts(env: Env): Promise<Response> {
-  const rows = await env.DB.prepare('SELECT id, name, price_cents AS priceCents, kind, description, active FROM products ORDER BY name').all();
+  const rows = await env.DB.prepare('SELECT p.id, p.name, p.price_cents AS priceCents, p.weekly_price_cents AS weeklyPriceCents, p.kind, p.description, p.active, p.category_id AS categoryId, c.name AS categoryName FROM products p LEFT JOIN product_categories c ON c.id = p.category_id ORDER BY c.sort_order, p.name').all();
   return Response.json({ products: rows.results });
 }
 
+export async function listCategories(env: Env): Promise<Response> {
+  const rows = await env.DB.prepare('SELECT id, name, sort_order AS sortOrder, active FROM product_categories ORDER BY sort_order').all();
+  return Response.json({ categories: rows.results });
+}
+
 export async function getProduct(env: Env, id: string): Promise<Response> {
-  const product = await env.DB.prepare('SELECT id, name, price_cents AS priceCents, kind, description, active FROM products WHERE id = ?').bind(id).first();
+  const product = await env.DB.prepare('SELECT p.id, p.name, p.price_cents AS priceCents, p.weekly_price_cents AS weeklyPriceCents, p.kind, p.description, p.active, p.category_id AS categoryId, c.name AS categoryName FROM products p LEFT JOIN product_categories c ON c.id = p.category_id WHERE p.id = ?').bind(id).first();
   if (!product) return Response.json({ error: 'Product not found' }, { status: 404 });
   const [ingredients, components] = await Promise.all([
     env.DB.prepare('SELECT ingredient_id AS id, servings FROM product_ingredients WHERE product_id = ?').bind(id).all(),
@@ -68,6 +73,13 @@ export async function saveProduct(env: Env, raw: unknown, id?: string): Promise<
   const name = string(data.name, 'name');
   const priceCents = nonnegative(data.priceCents, 'priceCents');
   if (priceCents === null || !Number.isInteger(priceCents)) throw new Error('priceCents must be an integer');
+  const weeklyPriceCents = nonnegative(data.weeklyPriceCents, 'weeklyPriceCents');
+  if (weeklyPriceCents !== null && !Number.isInteger(weeklyPriceCents)) throw new Error('weeklyPriceCents must be an integer');
+  const categoryId = optional(data.categoryId, 'categoryId', 100);
+  if (categoryId) {
+    const category = await env.DB.prepare('SELECT id FROM product_categories WHERE id = ? AND active = 1').bind(categoryId).first();
+    if (!category) throw new Error('Invalid categoryId');
+  }
   const kind = data.kind ?? 'individual';
   if (kind !== 'individual' && kind !== 'combo') throw new Error('Invalid product kind');
   const description = optional(data.description, 'description', 1000);
@@ -91,8 +103,8 @@ export async function saveProduct(env: Env, raw: unknown, id?: string): Promise<
     if (!exists) return Response.json({ error: 'Product not found' }, { status: 404 });
   }
   const statements = [
-    id ? env.DB.prepare('UPDATE products SET name = ?, price_cents = ?, kind = ?, description = ? WHERE id = ?').bind(name, priceCents, kind, description, id)
-      : env.DB.prepare('INSERT INTO products (id, name, price_cents, kind, description) VALUES (?, ?, ?, ?, ?)').bind(productId, name, priceCents, kind, description),
+    id ? env.DB.prepare('UPDATE products SET name = ?, price_cents = ?, weekly_price_cents = ?, category_id = ?, kind = ?, description = ? WHERE id = ?').bind(name, priceCents, weeklyPriceCents, categoryId, kind, description, id)
+      : env.DB.prepare('INSERT INTO products (id, name, price_cents, weekly_price_cents, category_id, kind, description) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(productId, name, priceCents, weeklyPriceCents, categoryId, kind, description),
     env.DB.prepare('DELETE FROM product_ingredients WHERE product_id = ?').bind(productId),
     env.DB.prepare('DELETE FROM combo_products WHERE combo_id = ?').bind(productId),
     ...ingredients.map(row => env.DB.prepare('INSERT INTO product_ingredients (product_id, ingredient_id, servings) VALUES (?, ?, ?)').bind(productId, row.id, row.servings)),

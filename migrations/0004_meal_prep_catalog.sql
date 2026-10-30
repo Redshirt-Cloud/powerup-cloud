@@ -1,0 +1,90 @@
+-- Snapshot of the owner-provided Meal Prep Tech export, reviewed 2026-10-30.
+-- The export merges names with truncated descriptions; descriptions are deliberately omitted.
+-- Zero-price portion helpers and the TEMP base product are deliberately omitted.
+CREATE TABLE product_categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  sort_order INTEGER NOT NULL UNIQUE,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))
+);
+ALTER TABLE products ADD COLUMN category_id TEXT REFERENCES product_categories(id);
+ALTER TABLE products ADD COLUMN weekly_price_cents INTEGER CHECK (weekly_price_cents >= 0);
+CREATE INDEX products_category_idx ON products(category_id, name);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('e9479152-a458-5e79-abbb-4831819aa53f', 'Combos', 0);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('f563624d-5083-5f36-907e-f20d03c97022', 'Wraps', 1);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('bfffcb53-b724-5be5-ad9b-b7c1561e4314', 'Salads', 2);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('f302ea97-c7ea-595c-83a8-8de27e7960f2', 'Power Bowls', 3);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('eca17dda-fcce-5717-bd77-23011cde2d48', 'Power Up Grill Bakery', 4);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 'Sauces', 5);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 'Protein', 6);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('69507c66-d4d8-528b-a233-ca82e54b639b', 'Vegetables', 7);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('7f50a9ab-ee80-5115-8522-d53a4c0ecbc7', 'Carbs', 8);
+INSERT INTO product_categories (id, name, sort_order) VALUES ('f76119e6-353e-5e2c-b82a-047d4780992d', 'Retail Supplements', 9);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('1146ffce-39ea-522c-8d72-9940b6627859', 'Atlantic Salmon Combo', 1075, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 1075);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('a30bc215-dcea-5d32-bd6d-ab9d5371638a', 'Steak Combo', 995, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 995);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('75475704-1561-55f5-8833-572c6575104d', 'Lean Ground Beef Combo', 875, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 875);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('42a304eb-a59d-5812-856d-255aa27a24f3', 'Ocean Caught Tilapia Combo', 995, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 995);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('8d8c1835-c6f5-5891-952c-0825622bcf9f', 'Organic Free-Range Chicken Combo', 875, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 875);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('c066d3be-5c5a-55ac-8c51-13bb9e83ce6a', 'Shrimp Combo', 1075, 'individual', 'e9479152-a458-5e79-abbb-4831819aa53f', 1075);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('368fa5ff-93de-52c2-84f1-48e1a7540229', 'Buffalo Wrap', 975, 'individual', 'f563624d-5083-5f36-907e-f20d03c97022', 975);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('e2d24bc4-7fd7-53ca-9dc1-3237b4061ac5', 'Caesar Wrap', 975, 'individual', 'f563624d-5083-5f36-907e-f20d03c97022', 975);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('08ef62bd-5826-5865-b06c-e448c113d07c', 'Chicken & Cheese Wrap', 899, 'individual', 'f563624d-5083-5f36-907e-f20d03c97022', 899);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('72a5f1b6-bae9-546b-bacb-db35d8c8d797', 'Fajita Wrap', 999, 'individual', 'f563624d-5083-5f36-907e-f20d03c97022', 999);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('97ba3b04-6446-51ed-a458-7c560ee09a4c', 'Greek Wrap', 999, 'individual', 'f563624d-5083-5f36-907e-f20d03c97022', 999);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('5a9e4244-0600-52b8-9ee8-7fa086e95b97', 'Caesar Salad', 1145, 'individual', 'bfffcb53-b724-5be5-ad9b-b7c1561e4314', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('a81a605f-1e2e-5b2a-b07a-d745893ab176', 'Fiesta Salad', 1145, 'individual', 'bfffcb53-b724-5be5-ad9b-b7c1561e4314', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('f091392b-4413-529b-ad43-a756a8a1748a', 'Greek Salad', 1145, 'individual', 'bfffcb53-b724-5be5-ad9b-b7c1561e4314', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('a806f3f3-252a-5405-bcc4-cb9b48ace468', 'Fried Rice Bowl', 1145, 'individual', 'f302ea97-c7ea-595c-83a8-8de27e7960f2', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('6915163e-9d2a-54d3-b7a8-e3d8dc164a79', 'Mediterranean Quinoa Bowl', 1145, 'individual', 'f302ea97-c7ea-595c-83a8-8de27e7960f2', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9f6ea49b-dea8-5d8e-8f6f-d45356c5adc2', 'Southwest Bowl', 1145, 'individual', 'f302ea97-c7ea-595c-83a8-8de27e7960f2', 1145);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('f6ebce02-c702-5e8e-9e3c-3a8093da6dc7', 'Chocolate Chip Protein Cookie', 350, 'individual', 'eca17dda-fcce-5717-bd77-23011cde2d48', 350);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('64a3cdde-f698-5a04-86f2-7247fb5a017b', 'Chocolate Oatmeal No-Bake Protein Cookie', 350, 'individual', 'eca17dda-fcce-5717-bd77-23011cde2d48', 350);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('5e61899d-788f-5ed7-9bec-1725f1f56315', 'Peanut Butter Protein Cookie', 350, 'individual', 'eca17dda-fcce-5717-bd77-23011cde2d48', 350);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('cf460017-3690-5111-91fb-16200992b331', 'BBQ Sauce', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('1468e200-fb46-5557-bfaa-79001b4a92ac', 'Bush Brown’s Jerk Sauce', 100, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 100);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('0fd8f979-565b-57b0-b3e7-2c6c4db60c10', 'Bush Brown’s Pukka Sauce', 100, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 100);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('10bbd4fe-52b3-5695-8b59-8d88111b3af1', 'Gold Grilling Sauce', 100, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 100);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('cea723b3-e28e-5ae0-86b5-9da632622d6f', 'Honey Mustard Sauce', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('c474b139-f14f-5655-a891-8331d5ea5cb0', 'Organic Ketchup Sauce', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9b4ea7d7-f28e-52ac-994b-e9c37a541d97', 'Ranch', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('14e9fce4-b623-5c88-89ba-a93646c7cf6b', 'Teriyaki Sauce', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('1b21e59e-35fa-5f78-a3a2-00b4634ef113', 'Flank Steak', 775, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 775);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('203edbb3-7c33-56c2-9756-a58ff5938477', 'Lean Ground Beef', 599, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 599);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('fd086306-66b8-595c-904f-f67c0b81c43b', 'Organic Chicken', 599, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 599);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('e5d26735-d231-5847-ae34-23839a6830f7', 'Salmon', 845, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 845);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('2c9307d9-24ca-54d0-a409-0f5b22bca77d', 'Shrimp', 745, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 745);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('dca002a0-d6d5-5379-878f-2c52f364128b', 'Wild-Caught Tilapia', 745, 'individual', 'c709c52e-ca92-5c5f-a2e3-53de2aa59d09', 745);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('108e041c-bd8f-5752-98e2-7a5abcc2ea21', 'Asparagus', 375, 'individual', '69507c66-d4d8-528b-a233-ca82e54b639b', 375);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('fc8a9579-3370-5897-bf85-f872873fd963', 'Broccoli', 375, 'individual', '69507c66-d4d8-528b-a233-ca82e54b639b', 375);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('81080dd9-12f6-5397-8dad-b07831e8e1ba', 'Green Beans', 375, 'individual', '69507c66-d4d8-528b-a233-ca82e54b639b', 375);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('597a5f68-5b60-5790-8ef1-ccce618b59da', 'Mixed Vegetable Medley', 445, 'individual', '69507c66-d4d8-528b-a233-ca82e54b639b', 445);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('c455c467-bc89-5cf2-80bd-673f594945be', 'Sautéed Spinach', 395, 'individual', '69507c66-d4d8-528b-a233-ca82e54b639b', 395);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9ae6a8de-33b9-5277-ac96-2e2bedb81328', 'Jasmine Rice', 375, 'individual', '7f50a9ab-ee80-5115-8522-d53a4c0ecbc7', 375);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('3d103860-8143-507d-b3f2-cc6428efe8ff', 'Mashed Sweet Potatoes', 395, 'individual', '7f50a9ab-ee80-5115-8522-d53a4c0ecbc7', 395);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('79c76958-9ec1-5618-9835-568c217aa242', 'Roasted Red Potatoes', 395, 'individual', '7f50a9ab-ee80-5115-8522-d53a4c0ecbc7', 395);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('f70435ce-7d8f-553c-8392-111a35f82c22', 'Quinoa', 499, 'individual', '7f50a9ab-ee80-5115-8522-d53a4c0ecbc7', 499);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('b698bea3-2701-5590-bfe4-bf6be7029692', 'EFX EAA 215g', 2500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 2500);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9261b758-0f85-5379-b810-e3ecc7bfa0fc', 'EFX Karbolyn 4lbs 4.8oz Strawberry', 6500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 6500);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('e8656c6e-626c-5f23-879b-c4de7bb37b15', 'Hi-Tech Critical Mass', 6500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('572f4afb-4feb-5d97-a98d-07c76e025412', 'Life Extension 2-Per-Day MultiVitamin', 2250, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9defaad4-a783-54e6-8d3a-8cbc3068310d', 'Life Extension Calm Mag', 2000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('46504fc6-be2c-5aae-a5c9-dd14e93f13ec', 'Life Extension Circumin Elite', 2000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('d70569a1-156d-5d4d-99cb-840b24e666c7', 'Life Extension Curcumin Elite 60 count', 2000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 2000);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('86b3485a-d97f-5bec-b83a-6d4d902cef68', 'Life Extension D-Ribose', 2250, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('23f5ab2a-d46d-54d4-b09b-6c2e42c7d3eb', 'Life Extension Enhanced Super Digestive Enzymes 60 count', 1500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 1500);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('06e242e7-db47-58cc-8c0d-e88ffc0f8cd6', 'Life Extension Extended Release Magnesium 60 count', 1250, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 1250);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('62606020-048f-55ad-becb-eeecac5408e9', 'Life Extension Glutathione, Cysteine, and C', 1750, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('48c74fd3-5534-5d2d-95a5-0be2f3c3c327', 'Life Extension Magnesium Citrate 100 count', 1300, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 1300);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('fc6d2641-7dca-57a5-8b13-4eb557ce9efb', 'Life Extension N-Acetyl-L-Cysteine', 1200, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('9948ab0d-e7a6-553b-8a9c-4386f3dcb9b3', 'Life Extension NAD+', 1850, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('b922383d-86a0-574c-aa53-60612cef0579', 'Life Extension NAD+ and Resveratrol', 4500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('416300aa-1067-57a1-8ff1-91d52ea906d5', 'Life Extension Optimized Carnitine', 2500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('2965e4b5-ab07-5399-9ab0-ae582936e67f', 'Life Extension Optimized Quercetin', 1500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('f6e3c684-cf69-58a5-97ec-3f990138b0ec', 'Life Extension Super Omega-3 120 count', 3000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 3000);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('b8e1906f-8492-5be1-840a-8de3e6a83188', 'Life Extension Super Ubiquinol (COq10) 200mg 30 count', 3200, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 3200);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('0d2866e6-ae2e-5a90-a746-0b8814d15979', 'Life Extension Vitamins Mix Capsules 360 count', 5000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 5000);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('f74d5c31-bb41-54b6-a8a6-6c9e4ea91600', 'Nytrowhey Ultra Elite Isolate Protein (4lbs)', 6500, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('c23992ca-f266-5277-b2ed-13dbfa156e8e', 'Prosource Mega BCAA', 2800, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', NULL);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('ae26e58a-c13d-5f3c-b4c7-c9196024fab8', 'Pump Ignitor 30 servings', 4000, 'individual', 'f76119e6-353e-5e2c-b82a-047d4780992d', 4000);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('a1adad80-6297-59e4-adf1-7022e2d8e9f1', 'Organic Mustard', 75, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 75);
+INSERT INTO products (id, name, price_cents, kind, category_id, weekly_price_cents) VALUES ('520d38f7-b64c-5fad-85ef-e89fc118a46f', 'Yum Yum', 100, 'individual', 'c2c44ed5-1c9d-5a84-9e45-45305a7868c9', 100);
