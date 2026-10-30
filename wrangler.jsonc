@@ -3,13 +3,22 @@
   "name": "powerup-cloud-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-30",
-  "workers_dev": true,
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "admin.powerupwv.com", "custom_domain": true },
+    { "pattern": "api.powerupwv.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": true
   },
   "triggers": { "crons": ["0 9 * * *"] },
+  "r2_buckets": [
+    { "binding": "PUBLIC_ASSETS", "bucket_name": "powerup-cloud-public" },
+    { "binding": "PRIVATE_ASSETS", "bucket_name": "powerup-cloud-private" }
+  ],
+  "secrets": { "required": ["STAFF_API_TOKEN", "AUTH_PEPPER"] },
   "d1_databases": [
     {
       "binding": "DB",

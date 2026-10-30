@@ -27,6 +27,8 @@ jobs:
       - run: npm run prepare:deploy
         env:
           CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          STAFF_API_TOKEN: ${{ secrets.STAFF_API_TOKEN }}
+          AUTH_PEPPER: ${{ secrets.AUTH_PEPPER }}
       - run: npm run db:migrate:remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -2,6 +2,7 @@ node_modules/
 .wrangler/
 coverage/
 wrangler.deploy.json
+wrangler.secrets.json
 .dev.vars
 .env
 dist/
